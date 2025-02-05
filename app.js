@@ -22,7 +22,7 @@ navigator.mediaDevices.getUserMedia({ video: true })
 // GitHub Releases からモデルをロードする関数
 async function loadModel() {
     feedback.innerText = "Loading model... Please wait.";
-    const modelUrl = 'https://github.com/komauma/dami-/releases/download/v1.0/best.onnx'; // 正しいURLに変更
+    const modelUrl = 'https://komauma.github.io/dami-/best.onnx'; // 正しいURLに変更
 
     try {
         // best.onnx をダウンロード
