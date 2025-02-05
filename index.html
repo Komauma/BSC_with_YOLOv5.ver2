@@ -5,11 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Badminton Shuttle Checker with YOLOv5</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for better typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Badminton Shuttle Checker with YOLOv5</h1>
-    <video id="video" width="640" height="480" autoplay></video>
-    <canvas id="canvas" width="640" height="480"></canvas>
+    <header>
+        <h1>Badminton Shuttle Checker with YOLOv5</h1>
+    </header>
+
+    <main>
+        <!-- Instructions for the user -->
+        <section class="instructions">
+            <p>Enable your camera and place a badminton shuttle in front of it. The system will detect and highlight the shuttle using YOLOv5.</p>
+        </section>
+
+        <!-- Feedback area -->
+        <section class="feedback" id="feedback">
+            <p>Loading model... Please wait.</p>
+        </section>
+
+        <!-- Video feed from camera -->
+        <section class="video-container">
+            <video id="video" width="640" height="480" autoplay></video>
+            <canvas id="canvas" width="640" height="480"></canvas>
+        </section>
+
+        <!-- Controls (Optional for improved usability) -->
+        <section class="controls">
+            <button id="startBtn" onclick="startDetection()">Start Detection</button>
+            <button id="stopBtn" onclick="stopDetection()">Stop Detection</button>
+        </section>
+    </main>
+
+    <!-- Footer with additional links or copyright -->
+    <footer>
+        <p>Created by Your Name. Powered by YOLOv5 and ONNX Runtime.</p>
+    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.js"></script>
     <script src="app.js"></script>
 </body>
