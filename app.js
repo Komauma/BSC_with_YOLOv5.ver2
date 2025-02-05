@@ -1,60 +1,108 @@
+// DOM要素の取得
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const feedback = document.getElementById('feedback');
 
-// Webカメラ映像を取得
-navigator.mediaDevices.getUserMedia({
-    video: true
-}).then(stream => {
-    video.srcObject = stream;
-    video.play();
-}).catch(err => {
-    console.error("Error accessing camera: " + err);
-});
-
+// モデルとセッションの変数
 let session;
+let isDetectionRunning = false;
 
+// ビデオの初期化
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+        video.srcObject = stream;
+        video.play();
+    })
+    .catch(err => {
+        feedback.innerText = "Error accessing camera: " + err.message;
+        feedback.style.color = "red";
+    });
+
+// モデルをロード
 async function loadModel() {
-    // YOLOv5モデル（ONNX）の読み込み
-    session = await ort.InferenceSession.create('model.onnx');
-    console.log("Model loaded.");
+    feedback.innerText = "Loading model... Please wait.";
+    try {
+        session = await ort.InferenceSession.create('best.onnx');
+        feedback.innerText = "Model loaded. Click 'Start Detection' to begin.";
+    } catch (err) {
+        feedback.innerText = "Failed to load model: " + err.message;
+        feedback.style.color = "red";
+    }
 }
 
-async function runDetection() {
-    // Canvas上にビデオフレームを描画
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+// 検出を開始する関数
+async function startDetection() {
+    if (!session) {
+        feedback.innerText = "Model is not loaded yet!";
+        return;
+    }
 
-    // 前処理：画像をテンソル形式に変換
-    const input = preprocess(imageData);
+    isDetectionRunning = true;
+    feedback.innerText = "Detection running...";
 
-    // 推論実行
-    const feeds = { input: input };
-    const results = await session.run(feeds);
+    const run = async () => {
+        if (!isDetectionRunning) return;
 
-    // 結果を処理
-    postprocess(results);
+        // 映像をCanvasに描画
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-    requestAnimationFrame(runDetection);
+        // 前処理：画像をテンソルに変換
+        const inputTensor = preprocess(imageData);
+
+        // 推論を実行
+        try {
+            const results = await session.run({ input: inputTensor });
+            postprocess(results);
+        } catch (err) {
+            feedback.innerText = "Error during detection: " + err.message;
+            feedback.style.color = "red";
+        }
+
+        // 次のフレームをリクエスト
+        if (isDetectionRunning) {
+            requestAnimationFrame(run);
+        }
+    };
+
+    run();
 }
 
+// 検出を停止する関数
+function stopDetection() {
+    isDetectionRunning = false;
+    feedback.innerText = "Detection stopped. Click 'Start Detection' to resume.";
+}
+
+// 画像の前処理
 function preprocess(imageData) {
-    let tensor = new Float32Array(imageData.data.length / 4 * 3);
-    return new ort.Tensor('float32', tensor, [1, 3, canvas.height, canvas.width]);
+    const { data, width, height } = imageData;
+    const tensor = new Float32Array(width * height * 3);
+
+    // 画像のピクセルデータを正規化し、3チャンネル（RGB）に変換
+    for (let i = 0, j = 0; i < data.length; i += 4, j += 3) {
+        tensor[j] = data[i] / 255;       // R
+        tensor[j + 1] = data[i + 1] / 255; // G
+        tensor[j + 2] = data[i + 2] / 255; // B
+    }
+
+    // テンソルを返す（[1, 3, height, width]の形に変換）
+    return new ort.Tensor('float32', tensor, [1, 3, height, width]);
 }
 
+// 結果を処理してCanvasに描画
 function postprocess(results) {
-    const boxes = results['output'][0];  // 結果の解析
+    const boxes = results['output'][0];  // モデルの出力に依存
+    ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
+
+    // 各バウンディングボックスを描画
     boxes.forEach(box => {
         const [x, y, width, height] = box;
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
         ctx.strokeRect(x, y, width, height);
     });
 }
 
-video.onloadeddata = () => {
-    loadModel().then(() => {
-        runDetection();
-    });
-};
+// ページ読み込み時にモデルをロード
+loadModel();
