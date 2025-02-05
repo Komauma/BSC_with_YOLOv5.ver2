@@ -23,7 +23,7 @@ async function loadModel() {
     feedback.innerText = "Loading model... Please wait.";
     startButton.disabled = true;
     try {
-        session = await ort.InferenceSession.create('best.onnx');
+        session = await ort.InferenceSession.create('https://github.com/Komauma/dami-/releases/download/v1.0/best.onnx');
         feedback.innerText = "Model loaded. Click 'Start Detection' to begin.";
         startButton.disabled = false;
     } catch (err) {
