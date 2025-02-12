@@ -22,11 +22,11 @@ navigator.mediaDevices.getUserMedia({ video: true })
 // Firebase Hosting からモデルをロードする関数
 async function loadModel() {
     feedback.innerText = "Loading model... Please wait.";
-    const modelUrl = 'https://badminton-shuttle-checker.web.app/best.onnx';
+    const modelUrl = 'https://badminton-shuttle-checker.web.app/best.onnx'; 
 
     try {
-        // best.onnx をダウンロード
-        const response = await fetch(modelUrl);
+        // best.onnx を fetch で取得
+        const response = await fetch(modelUrl, { mode: "cors" }); 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         // ArrayBuffer に変換
