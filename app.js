@@ -19,10 +19,10 @@ navigator.mediaDevices.getUserMedia({ video: true })
         feedback.style.color = "red";
     });
 
-// GitHub Releases からモデルをロードする関数
+// Firebase Hosting からモデルをロードする関数
 async function loadModel() {
     feedback.innerText = "Loading model... Please wait.";
-    const modelUrl = 'https://badminton-shuttle-checker.web.app/best.onnx'; // 正しいURLに変更
+    const modelUrl = 'https://badminton-shuttle-checker.web.app/best.onnx';
 
     try {
         // best.onnx をダウンロード
