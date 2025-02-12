@@ -25,17 +25,28 @@ async function loadModel() {
     const modelUrl = 'https://badminton-shuttle-checker.web.app/best.onnx'; 
 
     try {
+        console.log(`Fetching model from: ${modelUrl}`);
+
         // best.onnx を fetch で取得
-        const response = await fetch(modelUrl, { mode: "cors" }); 
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const response = await fetch(modelUrl, { mode: "cors" });
+
+        // HTTP ステータスを確認
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        console.log("Model fetched successfully.");
 
         // ArrayBuffer に変換
         const arrayBuffer = await response.arrayBuffer();
+        console.log("ArrayBuffer created.");
 
         // ONNX Runtime にロード
         session = await ort.InferenceSession.create(arrayBuffer);
         feedback.innerText = "Model loaded. Click 'Start Detection' to begin.";
+        console.log("Model loaded successfully.");
     } catch (err) {
+        console.error("Failed to load model:", err);
         feedback.innerText = "Failed to load model: " + err.message;
         feedback.style.color = "red";
     }
